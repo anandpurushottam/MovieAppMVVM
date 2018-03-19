@@ -4,6 +4,9 @@ import com.worldwide.movie.data.Movie;
 import com.worldwide.movie.data.MovieList;
 import com.worldwide.movie.data.VideoList;
 import java.util.List;
+
+
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -13,7 +16,8 @@ import retrofit2.http.Query;
  */
 
 public interface MoviesService {
-  @GET("movie/popular") List<Movie> movieList(@Query("page") Integer page);
+  @GET("movie/popular")
+  Observable<MovieList> movieList(@Query("page") Integer page);
 
   @GET("movie/{movie_id}/videos") List<VideoList> videoList(@Path("movie_id") Integer movieId);
 }

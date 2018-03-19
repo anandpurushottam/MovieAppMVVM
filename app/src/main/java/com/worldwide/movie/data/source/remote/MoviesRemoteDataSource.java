@@ -2,13 +2,22 @@ package com.worldwide.movie.data.source.remote;
 
 import android.support.annotation.NonNull;
 import com.worldwide.movie.data.Movie;
+import com.worldwide.movie.data.MovieList;
 import com.worldwide.movie.data.source.MovieDataSource;
 import com.worldwide.movie.data.source.remote.networking.MoviesService;
 import com.worldwide.movie.data.source.remote.networking.NetworkModule;
 import com.worldwide.movie.util.AppExecutors;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import java.util.Timer;
+import timber.log.Timber;
 
 /**
  * Created by Anand on 18-03-2018.
@@ -36,19 +45,33 @@ public class MoviesRemoteDataSource implements MovieDataSource {
   }
 
   @Override public void getMovies(@NonNull LoadMoviesCallback callback) {
-    Runnable runnable = () -> {
 
-      List<Movie> movies = NetworkModule.getInstance().create(MoviesService.class).movieList(1);
+    NetworkModule.getInstance()
+        .create(MoviesService.class)
+        .movieList(1)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeWith(new Observer<MovieList>() {
+          @Override public void onSubscribe(Disposable d) {
 
-      mAppExecutors.mainThread().execute(() -> {
-        if (movies.isEmpty()) {
-          callback.onDataNotAvailable();
-        } else {
-          callback.onMoviesLoaded(movies);
-        }
-      });
-    };
-    mAppExecutors.networkIO().execute(runnable);
+          }
+
+          @Override public void onNext(MovieList movieList) {
+            if (movieList.getMovies().isEmpty()) {
+              callback.onDataNotAvailable();
+            } else {
+              callback.onMoviesLoaded(movieList.getMovies());
+            }
+          }
+
+          @Override public void onError(Throwable e) {
+            callback.onDataNotAvailable();
+          }
+
+          @Override public void onComplete() {
+
+          }
+        });
   }
 
   @Override public void getMovie(@NonNull String movieID, @NonNull GetMovieCallback callback) {

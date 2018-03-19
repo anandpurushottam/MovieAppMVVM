@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: "jacoco"
 
 android {
   compileSdkVersion rootProject.ext.compileSdkVersion
@@ -18,6 +19,7 @@ android {
   buildTypes {
     debug {
       applicationIdSuffix '.debug'
+      testCoverageEnabled true
     }
     release {
       minifyEnabled false
@@ -78,9 +80,11 @@ dependencies {
 
   // Dependencies for local unit tests
   testCompile "junit:junit:$rootProject.ext.junitVersion"
-  testCompile "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
+  //testCompile "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
   testCompile "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
   testCompile "android.arch.core:core-testing:$rootProject.archLifecycleVersion"
+
+  testCompile "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
 
   // Android Testing Support Library's runner and rules
   androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"

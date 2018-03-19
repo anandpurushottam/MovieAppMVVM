@@ -7,9 +7,11 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.databinding.ObservableBoolean;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import com.worldwide.movie.data.Movie;
 import com.worldwide.movie.data.source.MovieDataSource;
 import com.worldwide.movie.data.source.MovieRepository;
+import java.util.Collections;
 import java.util.List;
 import timber.log.Timber;
 
@@ -22,7 +24,7 @@ public class MovieListViewModel extends AndroidViewModel {
   private final Context mContext;
   private final MovieRepository mMoviesRepository;
 
-  private MutableLiveData<List<Movie>> movieList;
+  public MutableLiveData<List<Movie>> movieList;
   public final ObservableBoolean dataLoading = new ObservableBoolean(false);
   public final ObservableBoolean error = new ObservableBoolean(false);
 
@@ -37,6 +39,10 @@ public class MovieListViewModel extends AndroidViewModel {
   }
 
   private void updateDataBindingObservables(List<Movie> movies) {
+    if (movies.isEmpty()) {
+      error.set(true);
+    }
+
     movieList.setValue(movies);
     dataLoading.set(false);
   }
@@ -67,7 +73,8 @@ public class MovieListViewModel extends AndroidViewModel {
       }
 
       @Override public void onDataNotAvailable() {
-        error.set(true);
+
+        updateDataBindingObservables(Collections.emptyList());
       }
     });
   }
